@@ -94,7 +94,7 @@ def call(Map config = [:]) {
                     )]) {
 
                         sh '''
-                        docker push $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         '''
                     }
                 }
