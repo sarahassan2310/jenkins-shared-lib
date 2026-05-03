@@ -8,9 +8,12 @@ def call(Map config = [:]) {
             maven 'maven-iti'
             jdk 'java17'
         }
+
         options {
-    timeout(time: 20, unit: 'MINUTES')
-}
+            timestamps()
+            ansiColor('xterm')
+            timeout(time: 20, unit: 'MINUTES')
+        }
 
         environment {
 
@@ -21,6 +24,7 @@ def call(Map config = [:]) {
 
         stages {
 
+            // 1 - CLONE
             stage('Clone') {
                 steps {
                     git branch: "${config.branch ?: 'main'}",
@@ -29,27 +33,28 @@ def call(Map config = [:]) {
                 }
             }
 
-
+            // 2 - COMPILE
             stage('Compile') {
                 steps {
                     sh "mvn clean compile"
                 }
             }
 
+            // 3 - TEST
             stage('Test') {
                 steps {
                     sh "mvn test -Dspring.profiles.active=test"
                 }
             }
 
-
+            // 4 - PACKAGE
             stage('Package') {
                 steps {
                     sh "mvn clean package -DskipTests"
                 }
             }
 
-        
+            // 5 - DOCKER LOGIN
             stage('Docker Login') {
 
                 steps {
@@ -67,33 +72,51 @@ def call(Map config = [:]) {
                 }
             }
 
-        
+            // 6 - BUILD IMAGE
             stage('Build Docker Image') {
                 steps {
-                    sh '''
-                    docker build -t $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG} .
-                    '''
+
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+
+                        sh '''
+                        docker build -t $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG} .
+                        '''
+                    }
                 }
             }
 
-            stage('Push Image') {
+            // 7 - PUSH IMAGE
+            stage('Push Docker Image') {
                 steps {
-                    sh '''
-                    docker push $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
-                    '''
+
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+
+                        sh '''
+                        docker push $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+                        '''
+                    }
                 }
             }
 
-
+            // 8 - DEPLOY
             stage('Deploy') {
                 steps {
+
                     sh '''
                     docker rm -f ${IMAGE_NAME} || true
 
                     docker run -d \
                     --name ${IMAGE_NAME} \
                     -p ${PORT}:8080 \
-                    $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+                    yourdockerhub/${IMAGE_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
