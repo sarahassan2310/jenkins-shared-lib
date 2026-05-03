@@ -8,6 +8,9 @@ def call(Map config = [:]) {
             maven 'maven-iti'
             jdk 'java17'
         }
+        options {
+    timeout(time: 20, unit: 'MINUTES')
+}
 
         environment {
 
