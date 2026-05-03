@@ -9,9 +9,9 @@ def call(Map config = [:]) {
         }
 
         environment {
-            IMAGE_NAME = config.imageName
-            IMAGE_TAG  = config.imageTag ?: "latest"
-            PORT       = config.port ?: "8081"
+            IMAGE_NAME = "${config.imageName}"
+            IMAGE_TAG  = "${config.imageTag ?: 'latest'}"
+            PORT       = "${config.port ?: '8080'}"
         }
 
         stages {
