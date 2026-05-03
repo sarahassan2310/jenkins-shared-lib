@@ -9,11 +9,6 @@ def call(Map config = [:]) {
             jdk 'java17'
         }
 
-        options {
-            timestamps()
-            timeout(time: 20, unit: 'MINUTES')
-        }
-
         environment {
 
             IMAGE_NAME = "${config.imageName}"
