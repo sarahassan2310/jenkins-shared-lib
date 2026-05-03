@@ -9,11 +9,6 @@ def call(Map config = [:]) {
             jdk 'java17'
         }
 
-        options {
-            timestamps()
-            ansiColor('xterm')
-        }
-
         environment {
 
             IMAGE_NAME = "${config.imageName}"
