@@ -94,7 +94,7 @@ def call(Map config = [:]) {
                     )]) {
 
                         sh '''
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
                         '''
                     }
                 }
@@ -110,7 +110,7 @@ def call(Map config = [:]) {
                     docker run -d \
                     --name ${IMAGE_NAME} \
                     -p ${PORT}:8080 \
-                    yourdockerhub/${IMAGE_NAME}:${IMAGE_TAG}
+                    sarahassan11/${IMAGE_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
