@@ -1,6 +1,7 @@
 def call(Map config = [:]) {
 
     pipeline {
+
         agent any
 
         tools {
@@ -8,7 +9,13 @@ def call(Map config = [:]) {
             jdk 'java17'
         }
 
+        options {
+            timestamps()
+            ansiColor('xterm')
+        }
+
         environment {
+
             IMAGE_NAME = "${config.imageName}"
             IMAGE_TAG  = "${config.imageTag ?: 'latest'}"
             PORT       = "${config.port ?: '8080'}"
@@ -18,9 +25,12 @@ def call(Map config = [:]) {
 
             stage('Clone') {
                 steps {
-                   git branch: 'main', url: config.repo, credentialsId: 'github-token'
+                    git branch: "${config.branch ?: 'main'}",
+                        url: config.repo,
+                        credentialsId: 'github-token'
                 }
             }
+
 
             stage('Compile') {
                 steps {
@@ -34,27 +44,59 @@ def call(Map config = [:]) {
                 }
             }
 
+
             stage('Package') {
                 steps {
-                    sh "mvn package"
+                    sh "mvn clean package"
                 }
             }
 
-            stage('Build Docker') {
+        
+            stage('Docker Login') {
+
                 steps {
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+
+                        sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        '''
+                    }
+                }
+            }
+
+        
+            stage('Build Docker Image') {
+                steps {
+                    sh '''
+                    docker build -t $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG} .
+                    '''
                 }
             }
 
             stage('Push Image') {
                 steps {
-                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh '''
+                    docker push $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
                 }
             }
 
+
             stage('Deploy') {
                 steps {
-                    sh "docker run -d -p ${PORT}:8080 ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh '''
+                    docker rm -f ${IMAGE_NAME} || true
+
+                    docker run -d \
+                    --name ${IMAGE_NAME} \
+                    -p ${PORT}:8080 \
+                    $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
                 }
             }
         }
