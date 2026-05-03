@@ -18,7 +18,7 @@ def call(Map config = [:]) {
 
             stage('Clone') {
                 steps {
-                    git config.repo
+                    git url: config.repo, credentialsId: 'github-token'
                 }
             }
 
