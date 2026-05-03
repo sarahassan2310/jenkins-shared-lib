@@ -35,14 +35,14 @@ def call(Map config = [:]) {
 
             stage('Test') {
                 steps {
-                    sh "mvn test"
+                    sh "mvn test -Dspring.profiles.active=test"
                 }
             }
 
 
             stage('Package') {
                 steps {
-                    sh "mvn clean package"
+                    sh "sh "mvn clean package -DskipTests""
                 }
             }
 
