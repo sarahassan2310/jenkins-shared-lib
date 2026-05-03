@@ -1,1 +1,62 @@
+def call(Map config = [:]) {
 
+    pipeline {
+        agent any
+
+        tools {
+            maven 'maven-iti'
+            jdk 'java17'
+        }
+
+        environment {
+            IMAGE_NAME = config.imageName
+            IMAGE_TAG  = config.imageTag ?: "latest"
+            PORT       = config.port ?: "8081"
+        }
+
+        stages {
+
+            stage('Clone') {
+                steps {
+                    git config.repo
+                }
+            }
+
+            stage('Compile') {
+                steps {
+                    sh "mvn clean compile"
+                }
+            }
+
+            stage('Test') {
+                steps {
+                    sh "mvn test"
+                }
+            }
+
+            stage('Package') {
+                steps {
+                    sh "mvn package"
+                }
+            }
+
+            stage('Build Docker') {
+                steps {
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+
+            stage('Push Image') {
+                steps {
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+
+            stage('Deploy') {
+                steps {
+                    sh "docker run -d -p ${PORT}:8080 ${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+    }
+}
