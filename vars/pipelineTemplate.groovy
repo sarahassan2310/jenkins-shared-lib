@@ -42,7 +42,7 @@ def call(Map config = [:]) {
 
             stage('Package') {
                 steps {
-                    sh "sh "mvn clean package -DskipTests""
+                    sh "mvn clean package -DskipTests"
                 }
             }
 
