@@ -11,7 +11,6 @@ def call(Map config = [:]) {
 
         options {
             timestamps()
-            ansiColor('xterm')
             timeout(time: 20, unit: 'MINUTES')
         }
 
