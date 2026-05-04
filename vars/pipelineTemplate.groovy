@@ -10,10 +10,9 @@ def call(Map config = [:]) {
         }
 
         environment {
-
             IMAGE_NAME = "${config.imageName}"
             IMAGE_TAG  = "${config.imageTag ?: 'latest'}"
-            PORT       = "${config.port ?: '8080'}"
+            APP_PORT   = "${config.port ?: '8080'}"
         }
 
         stages {
@@ -50,7 +49,6 @@ def call(Map config = [:]) {
 
             // 5 - DOCKER LOGIN
             stage('Docker Login') {
-
                 steps {
 
                     withCredentials([usernamePassword(
@@ -94,7 +92,7 @@ def call(Map config = [:]) {
                     )]) {
 
                         sh '''
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG} 
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         '''
                     }
                 }
@@ -102,23 +100,24 @@ def call(Map config = [:]) {
 
             // 8 - DEPLOY
             stage('Deploy') {
-                 steps {
+                steps {
 
-        withCredentials([usernamePassword(
-            credentialsId: 'dockerhub',
-            usernameVariable: 'DOCKER_USER',
-            passwordVariable: 'DOCKER_PASS'
-        )]) {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
 
-            sh '''
-            docker rm -f ${IMAGE_NAME} || true
+                        sh '''
+                        docker rm -f ${IMAGE_NAME} || true
 
-            docker run -d \
-            --name ${IMAGE_NAME} \
-            -p ${PORT}:8080 \
-            $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
-            '''
-        }
+                        docker run -d \
+                        --name ${IMAGE_NAME} \
+                        -p ${APP_PORT}:8080 \
+                        $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+                        '''
+                    }
+                }
             }
         }
     }
