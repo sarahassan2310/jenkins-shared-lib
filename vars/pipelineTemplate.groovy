@@ -94,7 +94,7 @@ def call(Map config = [:]) {
                     )]) {
 
                         sh '''
-                        docker push  $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG} 
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG} 
                         '''
                     }
                 }
@@ -102,17 +102,23 @@ def call(Map config = [:]) {
 
             // 8 - DEPLOY
             stage('Deploy') {
-                steps {
+                 steps {
 
-                    sh '''
-                    docker rm -f ${IMAGE_NAME} || true
+        withCredentials([usernamePassword(
+            credentialsId: 'dockerhub',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+        )]) {
 
-                    docker run -d \
-                    --name ${IMAGE_NAME} \
-                    -p ${PORT}:8080 \
-                    sarahassan11/${IMAGE_NAME}:${IMAGE_TAG}
-                    '''
-                }
+            sh '''
+            docker rm -f ${IMAGE_NAME} || true
+
+            docker run -d \
+            --name ${IMAGE_NAME} \
+            -p ${PORT}:8080 \
+            $DOCKER_USER/${IMAGE_NAME}:${IMAGE_TAG}
+            '''
+        }
             }
         }
     }
