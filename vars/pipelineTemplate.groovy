@@ -4,23 +4,21 @@ def call(Map config = [:]) {
 
         agent any
 
-        environment {
-            GIT_REPO   = config.gitRepo
-            GIT_BRANCH = config.gitBranch ?: 'main'
-        }
-
         stages {
 
             stage('Clone Repository') {
                 steps {
                     script {
 
-                        echo "Cloning repository..."
-                        echo "Repo: ${GIT_REPO}"
-                        echo "Branch: ${GIT_BRANCH}"
+                        def repo = config.gitRepo
+                        def branch = config.gitBranch ?: 'main'
 
-                        git branch: GIT_BRANCH,
-                            url: GIT_REPO
+                        echo "Cloning repository..."
+                        echo "Repo: ${repo}"
+                        echo "Branch: ${branch}"
+
+                        git branch: branch,
+                            url: repo
                     }
                 }
             }
