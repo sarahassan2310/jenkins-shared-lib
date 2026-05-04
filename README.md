@@ -7,6 +7,7 @@ It automates the full lifecycle from code push to container deployment.
 ---
 
 ## 📌 Architecture Overview
+![Pipeline Diagram](images/projectoverview.jpeg)
 
 The pipeline integrates the following components:
 
