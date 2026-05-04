@@ -12,12 +12,11 @@ def call(Map config = [:]) {
         environment {
             IMAGE_NAME = "${config.imageName}"
             IMAGE_TAG  = "${config.imageTag ?: 'latest'}"
-            APP_PORT   = "${config.port ?: '8080'}"
         }
 
         stages {
 
-            // 1 - CLONE
+            // CLONE
             stage('Clone') {
                 steps {
                     git branch: "${config.branch ?: 'main'}",
@@ -26,28 +25,39 @@ def call(Map config = [:]) {
                 }
             }
 
-            // 2 - COMPILE
+            // 2 - CONFIG 
+            stage('Config') {
+                steps {
+                    script {
+
+                        env.APP_PORT = config.port ?: '8080'
+
+                    }
+                }
+            }
+
+            // 3 - COMPILE
             stage('Compile') {
                 steps {
                     sh "mvn clean compile"
                 }
             }
 
-            // 3 - TEST
+            // 4 - TEST
             stage('Test') {
                 steps {
-                    sh  "mvn test -Dspring.profiles.active=test -B"
+                    sh "mvn test -Dspring.profiles.active=test -B"
                 }
             }
 
-            // 4 - PACKAGE
+            // 5 - PACKAGE
             stage('Package') {
                 steps {
-                    sh "mvn clean package "
+                    sh "mvn clean package -DskipTests"
                 }
             }
 
-            // 5 - DOCKER LOGIN
+            // 6 - DOCKER LOGIN
             stage('Docker Login') {
                 steps {
 
@@ -64,7 +74,7 @@ def call(Map config = [:]) {
                 }
             }
 
-            // 6 - BUILD IMAGE
+            // 7 - BUILD IMAGE
             stage('Build Docker Image') {
                 steps {
 
@@ -81,7 +91,7 @@ def call(Map config = [:]) {
                 }
             }
 
-            // 7 - PUSH IMAGE
+            // 8 - PUSH IMAGE
             stage('Push Docker Image') {
                 steps {
 
@@ -98,7 +108,7 @@ def call(Map config = [:]) {
                 }
             }
 
-            // 8 - DEPLOY
+            // 9 - DEPLOY
             stage('Deploy') {
                 steps {
 
