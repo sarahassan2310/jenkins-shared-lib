@@ -142,18 +142,6 @@ Containers are deployed on the host machine:
 
 ---
 
-## 📷 Architecture Diagram
-
-> See the pipeline diagram in this repository for full visualization.
-
----
-
-
----
-
-
----
-
 ## ⭐ Final Note
 
 This project demonstrates how to build a **scalable, reusable, and secure CI/CD pipeline** for microservices using Jenkins Shared Library.
