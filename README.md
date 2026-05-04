@@ -115,7 +115,7 @@ Containers are deployed on the host machine:
 
 * No open ports on Jenkins server
 * Secure communication via Cloudflare Tunnel
-* Credentials managed داخل Jenkins
+* Credentials managed in Jenkins
 
 ---
 
@@ -147,18 +147,9 @@ Containers are deployed on the host machine:
 
 ---
 
-## 🧠 Future Improvements
-
-* Add Kubernetes deployment
-* Integrate SonarQube for code quality
-* Add notifications (Slack/Email)
-* Implement rollback strategy
 
 ---
 
-## 👩‍💻 Author
-
-**Sarah Hassan**
 
 ---
 
